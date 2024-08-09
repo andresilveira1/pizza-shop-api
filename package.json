@@ -1,0 +1,38 @@
+{
+  "name": "api",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "build": "bun build src/server.ts",
+    "start": "NODE_ENV=production bun src/server.ts",
+    "test": "bun test",
+    "generate": "drizzle-kit generate",
+    "migrate": "bun src/db/migrate.ts",
+    "studio": "drizzle-kit studio",
+    "seed": "bun src/db/seed.ts",
+    "lint": "eslint src *.ts --fix"
+  },
+  "dependencies": {
+    "@elysiajs/jwt": "^1.1.0",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "dayjs": "^1.11.12",
+    "drizzle-orm": "^0.32.1",
+    "drizzle-typebox": "^0.1.1",
+    "elysia": "^1.1.5",
+    "nodemailer": "^6.9.14",
+    "postgres": "^3.4.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@rocketseat/eslint-config": "^2.2.2",
+    "@types/bun": "latest",
+    "@types/nodemailer": "^6.4.15",
+    "chalk": "^5.3.0",
+    "drizzle-kit": "^0.23.1",
+    "eslint": "8.57.0",
+    "eslint-plugin-drizzle": "^0.2.3",
+    "typescript": "^5.5.4"
+  }
+}
