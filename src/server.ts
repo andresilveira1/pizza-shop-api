@@ -7,7 +7,7 @@ import { authenticateFromLink } from './routes/authenticate-from-link'
 import { signOut } from './routes/sign-out'
 import { getProfile } from './routes/get-profile'
 import { getManagedRestaurant } from './routes/get-managed-restaurant'
-import { getOrderDetails } from './routes/get-order-datails'
+import { getOrderDetails } from './routes/get-order-details'
 import { approveOrder } from './routes/approve-order'
 import { cancelOrder } from './routes/cancel-order'
 import { deliveredOrder } from './routes/delivered-order'
@@ -19,6 +19,9 @@ import { getMonthOrdersAmount } from './routes/get-month-orders-amout'
 import { getMonthCanceledOrdersAmount } from './routes/get-month-canceled-orders-amount'
 import { getPopularProducts } from './routes/get-popular-products'
 import { getDailyRevenueInPeriod } from './routes/get-daily-revenue-in-period'
+import { updateRestaurantProfile } from './routes/update-restaurant-profile'
+import { UnauthorizedError } from './utils/errors/unauthorized-error'
+import { NotAManagerError } from './utils/errors/not-a-manager-error'
 
 const app = new Elysia()
   .use(
@@ -37,6 +40,10 @@ const app = new Elysia()
       },
     }),
   )
+  .error({
+    UNAUTHORIZED: UnauthorizedError,
+    NOT_A_MANAGER: NotAManagerError,
+  })
   .onError(({ code, error, set }) => {
     switch (code) {
       case 'VALIDATION': {
@@ -44,12 +51,18 @@ const app = new Elysia()
 
         return error.toResponse()
       }
+      case 'UNAUTHORIZED': {
+        set.status = 401
+        return { code, message: error.message }
+      }
+      case 'NOT_A_MANAGER': {
+        set.status = 401
+        return { code, message: error.message }
+      }
       case 'NOT_FOUND': {
         return new Response(null, { status: 404 })
       }
       default: {
-        set.status = 500
-
         console.error(error)
 
         return new Response(null, { status: 500 })
@@ -74,6 +87,7 @@ const app = new Elysia()
   .use(getMonthCanceledOrdersAmount)
   .use(getPopularProducts)
   .use(getDailyRevenueInPeriod)
+  .use(updateRestaurantProfile)
 
 app.listen(3333, () => {
   console.log('HTTP server running!')
