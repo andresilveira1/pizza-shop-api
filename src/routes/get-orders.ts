@@ -4,17 +4,23 @@ import { and, count, desc, eq, ilike, sql } from 'drizzle-orm'
 
 import { auth } from '../auth'
 import { db } from '../db/connection'
-import { UnauthorizedError } from '../utils/errors/unauthorized-error'
 import { orders, users } from '../db/schema'
+import { NotAManagerError } from '../utils/errors/not-a-manager-error'
 
 export const getOrders = new Elysia().use(auth).get(
   '/orders',
-  async ({ getCurrentUser, query }) => {
+  async ({ getCurrentUser, query, set }) => {
     const { restaurantId } = await getCurrentUser()
     const { customerName, orderId, status, pageIndex } = query
 
+    const processedCustomerName = customerName
+      ? customerName.replace(/\+/g, ' ').trim()
+      : undefined
+
     if (!restaurantId) {
-      throw new UnauthorizedError()
+      set.status = 401
+
+      throw new NotAManagerError()
     }
 
     const baseQuery = db
@@ -31,8 +37,10 @@ export const getOrders = new Elysia().use(auth).get(
         and(
           eq(orders.restaurantId, restaurantId),
           orderId ? ilike(orders.id, `%${orderId}%`) : undefined,
-          status ? eq(orders.id, status) : undefined,
-          customerName ? ilike(users.name, `%${customerName}%`) : undefined,
+          status ? eq(orders.status, status) : undefined,
+          customerName
+            ? ilike(users.name, `%${processedCustomerName}%`)
+            : undefined,
         ),
       )
 
